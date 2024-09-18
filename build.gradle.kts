@@ -23,10 +23,6 @@ kotlin {
     }
 }
 
-java {
-    withSourcesJar()
-}
-
 tasks {
     test {
         useJUnitPlatform()
