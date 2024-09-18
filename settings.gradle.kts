@@ -1,11 +1,12 @@
 rootProject.name = "oppgave-client"
 
 pluginManagement {
-    val jvmVersion: String by settings
+    val kotlinVersion: String by settings
+    val kotlinterVersion: String by settings
     plugins {
-        kotlin("jvm") version jvmVersion
-        kotlin("plugin.serialization") version jvmVersion
-        id("org.jmailen.kotlinter")
+        kotlin("jvm") version kotlinVersion
+        kotlin("plugin.serialization") version kotlinVersion
+        id("org.jmailen.kotlinter") version kotlinterVersion
         id("maven-publish")
     }
 }

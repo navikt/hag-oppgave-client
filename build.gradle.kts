@@ -1,9 +1,10 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val ktorVersion: String by project
 val kotlinVersion: String by project
 val logbackVersion: String by project
 val mockkVersion: String by project
+val tokenProviderVersion: String by project
 val githubPassword: String by project
 
 plugins {
@@ -13,11 +14,18 @@ plugins {
     id("maven-publish")
 }
 
+
 group = "no.nav.helsearbeidsgiver"
 version = "0.1.2"
 
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "11"
+kotlin {
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_21)
+    }
+}
+
+java {
+    withSourcesJar()
 }
 
 tasks {
@@ -33,7 +41,7 @@ repositories {
             username = "x-access-token"
             password = githubPassword
         }
-        setUrl("https://maven.pkg.github.com/navikt/helsearbeidsgiver-tokenprovider")
+        setUrl("https://maven.pkg.github.com/navikt/*")
     }
 }
 
@@ -45,7 +53,7 @@ publishing {
     }
     repositories {
         maven {
-            url = uri("https://maven.pkg.github.com/navikt/${rootProject.name}")
+            url = uri("https://maven.pkg.github.com/navikt/hag-${rootProject.name}")
             credentials {
                 username = System.getenv("GITHUB_ACTOR")
                 password = System.getenv("GITHUB_TOKEN")
@@ -61,7 +69,7 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     implementation("com.nimbusds:nimbus-jose-jwt:9.+")
-    implementation("no.nav.helsearbeidsgiver:helsearbeidsgiver-tokenprovider:0.+")
+    implementation("no.nav.helsearbeidsgiver:tokenprovider:$tokenProviderVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
 }
