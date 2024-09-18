@@ -34,6 +34,10 @@ tasks {
     }
 }
 
+repositories {
+    mavenCentral()
+    mavenNav("*")
+}
 
 publishing {
     publications {
