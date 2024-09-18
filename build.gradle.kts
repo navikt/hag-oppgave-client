@@ -34,16 +34,6 @@ tasks {
     }
 }
 
-repositories {
-    mavenCentral()
-    maven {
-        credentials {
-            username = "x-access-token"
-            password = githubPassword
-        }
-        setUrl("https://maven.pkg.github.com/navikt/*")
-    }
-}
 
 publishing {
     publications {
@@ -55,6 +45,7 @@ publishing {
         mavenNav("hag-${rootProject.name}")
     }
 }
+
 fun RepositoryHandler.mavenNav(repo: String): MavenArtifactRepository {
     val githubPassword: String by project
 
