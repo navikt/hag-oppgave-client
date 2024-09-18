@@ -8,18 +8,23 @@ class OppgaveClient constructor(
     val oppgavebehndlingUrl: String,
     val httpClient: HttpClient,
 ) {
-
     private val log = LoggerFactory.getLogger(OppgaveClient::class.java)
 
     private suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse {
         TODO("Implementer opprettOppgave")
     }
 
-    private suspend fun hentOppgave(oppgavetype: String, journalpostId: String): OppgaveResponse {
+    private suspend fun hentOppgave(
+        oppgavetype: String,
+        journalpostId: String,
+    ): OppgaveResponse {
         TODO("Implementer hentOppgave")
     }
 
-    private suspend fun hentHvisOppgaveFinnes(oppgavetype: String, journalpostId: String): Any? {
+    private suspend fun hentHvisOppgaveFinnes(
+        oppgavetype: String,
+        journalpostId: String,
+    ): Any? {
         TODO("Implementer hentHvisOppgaveFinnes")
     }
 }
@@ -37,16 +42,16 @@ data class OpprettOppgaveRequest(
     val behandlingstema: String? = null,
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate? = null,
-    val prioritet: String
+    val prioritet: String,
 )
 
 data class OpprettOppgaveResponse(
-    val id: Int
+    val id: Int,
 )
 
 data class OppgaveResponse(
     val antallTreffTotalt: Int,
-    val oppgaver: List<Oppgave>
+    val oppgaver: List<Oppgave>,
 )
 
 data class Oppgave(
@@ -56,5 +61,5 @@ data class Oppgave(
     val journalpostId: String?,
     val saksreferanse: String?,
     val tema: String?,
-    val oppgavetype: String?
+    val oppgavetype: String?,
 )
