@@ -10,7 +10,7 @@ val githubPassword: String by project
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
-    id("org.jmailen.kotlinter") version "3.10.0"
+    id("org.jmailen.kotlinter")
     id("maven-publish")
 }
 
@@ -69,7 +69,6 @@ dependencies {
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     implementation("com.nimbusds:nimbus-jose-jwt:9.+")
-    implementation("no.nav.helsearbeidsgiver:tokenprovider:$tokenProviderVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
 }
