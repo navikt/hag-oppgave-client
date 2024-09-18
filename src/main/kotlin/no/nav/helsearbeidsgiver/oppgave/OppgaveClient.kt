@@ -1,33 +1,6 @@
 package no.nav.syfo.client
 
-import io.ktor.client.HttpClient
-import org.slf4j.LoggerFactory
 import java.time.LocalDate
-
-class OppgaveClient constructor(
-    val oppgavebehndlingUrl: String,
-    val httpClient: HttpClient,
-) {
-    private val log = LoggerFactory.getLogger(OppgaveClient::class.java)
-
-    private suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse {
-        TODO("Implementer opprettOppgave")
-    }
-
-    private suspend fun hentOppgave(
-        oppgavetype: String,
-        journalpostId: String,
-    ): OppgaveResponse {
-        TODO("Implementer hentOppgave")
-    }
-
-    private suspend fun hentHvisOppgaveFinnes(
-        oppgavetype: String,
-        journalpostId: String,
-    ): Any? {
-        TODO("Implementer hentHvisOppgaveFinnes")
-    }
-}
 
 data class OpprettOppgaveRequest(
     val tildeltEnhetsnr: String? = null,
