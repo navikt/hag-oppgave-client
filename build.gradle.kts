@@ -52,16 +52,20 @@ publishing {
         }
     }
     repositories {
-        maven {
-            url = uri("https://maven.pkg.github.com/navikt/hag-${rootProject.name}")
-            credentials {
-                username = System.getenv("GITHUB_ACTOR")
-                password = System.getenv("GITHUB_TOKEN")
-            }
+        mavenNav("hag-${rootProject.name}")
+    }
+}
+fun RepositoryHandler.mavenNav(repo: String): MavenArtifactRepository {
+    val githubPassword: String by project
+
+    return maven {
+        setUrl("https://maven.pkg.github.com/navikt/$repo")
+        credentials {
+            username = "x-access-token"
+            password = githubPassword
         }
     }
 }
-
 dependencies {
     testImplementation(kotlin("test"))
     implementation("io.ktor:ktor-client-core:$ktorVersion")
