@@ -1,38 +1,105 @@
-package no.nav.syfo.client
+package no.nav.helsearbeidsgiver.oppgave
 
-import java.time.LocalDate
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.http.contentType
+import io.ktor.http.withCharset
+import no.nav.helsearbeidsgiver.utils.log.MdcUtils
+import no.nav.helsearbeidsgiver.utils.log.logger
 
-data class OpprettOppgaveRequest(
-    val tildeltEnhetsnr: String? = null,
-    val aktoerId: String? = null,
-    val journalpostId: String? = null,
-    val behandlesAvApplikasjon: String? = null,
-    val saksreferanse: String? = null,
-    val beskrivelse: String? = null,
-    val tema: String? = null,
-    val oppgavetype: String,
-    val behandlingstype: String? = null,
-    val behandlingstema: String? = null,
-    val aktivDato: LocalDate,
-    val fristFerdigstillelse: LocalDate? = null,
-    val prioritet: String,
-)
+interface OppgaveClient {
+    suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse
 
-data class OpprettOppgaveResponse(
-    val id: Int,
-)
+    suspend fun hentOppgaver(hentOppgaverRequest: HentOppgaverRequest): OppgaveListeResponse
 
-data class OppgaveResponse(
-    val antallTreffTotalt: Int,
-    val oppgaver: List<Oppgave>,
-)
+    suspend fun hentOppgave(oppgaveId: Int): Oppgave
+}
 
-data class Oppgave(
-    val id: Int,
-    val tildeltEnhetsnr: String?,
-    val aktoerId: String?,
-    val journalpostId: String?,
-    val saksreferanse: String?,
-    val tema: String?,
-    val oppgavetype: String?,
-)
+class OppgaveClientImpl(
+    private val url: String,
+    private val getToken: () -> String,
+) : OppgaveClient {
+    override suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse {
+        val token = getToken()
+        val httpClient = createHttpClient()
+        val httpResponse =
+            httpClient.post(url) {
+                contentType(ContentType.Application.Json.withCharset(Charsets.UTF_8))
+                header("Authorization", "Bearer $token")
+                header("X-Correlation-ID", MdcUtils.getCallId())
+                setBody(opprettOppgaveRequest)
+            }
+        return when (httpResponse.status) {
+            HttpStatusCode.OK -> {
+                httpResponse.call.response.body()
+            }
+
+            HttpStatusCode.Created -> {
+                httpResponse.call.response.body()
+            }
+
+            else -> {
+                logger().error("Feilet å opprette oppgave : $httpResponse")
+                throw RuntimeException("Feilet å opprette oppgave")
+            }
+        }
+    }
+
+    override suspend fun hentOppgaver(hentOppgaverRequest: HentOppgaverRequest): OppgaveListeResponse {
+        val httpClient = createHttpClient()
+        val httpResponse =
+            httpClient.get("$url") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer ${getToken()}")
+                header("X-Correlation-ID", MdcUtils.getCallId())
+                parameter("oppgavetype", hentOppgaverRequest.oppgavetype)
+                parameter("tema", hentOppgaverRequest.tema)
+                parameter("behandlingstype", hentOppgaverRequest.behandlingstype)
+                parameter("behandlingstema", hentOppgaverRequest.behandlingstema)
+                parameter("statuskategori", hentOppgaverRequest.statuskategori)
+                parameter("tildeltEnhetsnr", hentOppgaverRequest.tildeltEnhetsnr)
+                parameter("tilordnetRessurs", hentOppgaverRequest.tilordnetRessurs)
+                parameter("journalpostId", hentOppgaverRequest.journalpostId)
+                parameter("saksreferanse", hentOppgaverRequest.saksreferanse)
+                parameter("orgnr", hentOppgaverRequest.orgnr)
+                parameter("limit", hentOppgaverRequest.limit)
+                parameter("offset", hentOppgaverRequest.offset)
+            }
+        return when (httpResponse.status) {
+            HttpStatusCode.OK -> {
+                httpResponse.call.response.body()
+            }
+
+            else -> {
+                logger().error("Feilet å hente oppgave : $httpResponse")
+                throw RuntimeException("Feilet å hente oppgave")
+            }
+        }
+    }
+
+    override suspend fun hentOppgave(oppgaveId: Int): Oppgave {
+        val httpClient = createHttpClient()
+        val httpResponse =
+            httpClient.get("$url/$oppgaveId") {
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer ${getToken()}")
+                header("X-Correlation-ID", MdcUtils.getCallId())
+            }
+        return when (httpResponse.status) {
+            HttpStatusCode.OK -> {
+                httpResponse.call.response.body()
+            }
+
+            else -> {
+                logger().error("Feilet å hente oppgave : $httpResponse")
+                throw RuntimeException("Feilet å hente oppgave")
+            }
+        }
+    }
+}

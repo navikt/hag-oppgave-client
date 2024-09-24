@@ -6,6 +6,8 @@ val logbackVersion: String by project
 val mockkVersion: String by project
 val tokenProviderVersion: String by project
 val githubPassword: String by project
+val kotlinSerializationVersion: String by project
+val utilsVersion: String by project
 
 plugins {
     kotlin("jvm")
@@ -26,6 +28,7 @@ kotlin {
 tasks {
     test {
         useJUnitPlatform()
+        jvmArgs("-XX:+EnableDynamicAgentLoading")
     }
 }
 
@@ -61,8 +64,14 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-json:$ktorVersion")
     implementation("io.ktor:ktor-client-serialization:$ktorVersion")
-    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
     implementation("com.nimbusds:nimbus-jose-jwt:9.+")
-    testImplementation("io.mockk:mockk:$mockkVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.2.0")
+    implementation("no.nav.helsearbeidsgiver:utils:$utilsVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
+    testRuntimeOnly("org.slf4j:slf4j-simple:2.0.7")
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
 }
