@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 object Oppgavetype {
     const val INNTEKTSMELDING = "INNT"
     const val FORDELINGSOPPGAVE = "FDR"
-    const val ROB_BEH = "ROB_BEH"
+    const val ROBOT_BEHANDLING = "ROB_BEH"
 }
 
 @Serializable
