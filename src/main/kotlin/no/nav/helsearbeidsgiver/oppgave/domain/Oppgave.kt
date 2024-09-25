@@ -1,14 +1,12 @@
-package no.nav.helsearbeidsgiver.oppgave
+@file:UseSerializers(LocalDateSerializer::class, LocalDateTimeSerializer::class)
 
-import kotlinx.serialization.KSerializer
+package no.nav.helsearbeidsgiver.oppgave.domain
+
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.PrimitiveKind
-import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.encoding.Decoder
-import kotlinx.serialization.encoding.Encoder
+import kotlinx.serialization.UseSerializers
+import no.nav.helsearbeidsgiver.utils.json.serializer.LocalDateSerializer
+import no.nav.helsearbeidsgiver.utils.json.serializer.LocalDateTimeSerializer
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Serializable
 data class Oppgave(
@@ -26,9 +24,7 @@ data class Oppgave(
     val oppgavetype: String,
     val behandlingstype: String? = null,
     val behandlingstema: String? = null,
-    @Serializable(LocalDateSerializer::class)
     val aktivDato: LocalDate,
-    @Serializable(LocalDateSerializer::class)
     val fristFerdigstillelse: LocalDate? = null,
     val prioritet: String,
     val status: String? = null,
@@ -48,9 +44,7 @@ data class OpprettOppgaveRequest(
     val oppgavetype: String,
     val behandlingstype: String? = null,
     val behandlingstema: String? = null,
-    @Serializable(LocalDateSerializer::class)
     val aktivDato: LocalDate,
-    @Serializable(LocalDateSerializer::class)
     val fristFerdigstillelse: LocalDate? = null,
     val prioritet: Prioritet,
 )
@@ -81,18 +75,3 @@ data class OppgaveListeResponse(
     val antallTreffTotalt: Int,
     val oppgaver: List<Oppgave>,
 )
-
-object LocalDateSerializer : KSerializer<LocalDate> {
-    private val formatter = DateTimeFormatter.ISO_LOCAL_DATE
-
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("LocalDate", PrimitiveKind.STRING)
-
-    override fun serialize(
-        encoder: Encoder,
-        value: LocalDate,
-    ) {
-        encoder.encodeString(value.format(formatter))
-    }
-
-    override fun deserialize(decoder: Decoder): LocalDate = LocalDate.parse(decoder.decodeString(), formatter)
-}

@@ -1,4 +1,4 @@
-package no.nav.helsearbeidsgiver.oppgave
+package no.nav.helsearbeidsgiver.oppgave.domain
 
 import kotlinx.serialization.Serializable
 

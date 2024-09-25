@@ -3,6 +3,8 @@ package no.nav.helsearbeidsgiver.oppgave
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -12,10 +14,24 @@ import io.mockk.every
 import io.mockk.mockkStatic
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
+import no.nav.helsearbeidsgiver.oppgave.domain.Behandlingstema
+import no.nav.helsearbeidsgiver.oppgave.domain.Behandlingstype
+import no.nav.helsearbeidsgiver.oppgave.domain.HentOppgaverRequest
+import no.nav.helsearbeidsgiver.oppgave.domain.Oppgavetype
+import no.nav.helsearbeidsgiver.oppgave.domain.OpprettOppgaveRequest
+import no.nav.helsearbeidsgiver.oppgave.domain.Prioritet
+import no.nav.helsearbeidsgiver.oppgave.domain.Statuskategori
+import no.nav.helsearbeidsgiver.oppgave.domain.Tema
+import no.nav.helsearbeidsgiver.oppgave.exception.HentOppgaveFeiletException
+import no.nav.helsearbeidsgiver.oppgave.exception.OpprettOppgaveFeiletException
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+
+private const val URL = "http://dummyUrl"
 
 class OppgaveClientImplTest {
     @Test
@@ -40,7 +56,7 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl("http://localhost") { "token" }
+                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
 
                 val response = oppgaveClient.hentOppgave(1)
 
@@ -53,15 +69,38 @@ class OppgaveClientImplTest {
         }
 
     @Test
+    fun `hentOppgave should throw HentOppgaveFeiletException on failure`() =
+        runBlocking {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = "Not Found",
+                        status = HttpStatusCode.NotFound,
+                        headers = headersOf("Content-Type" to listOf(ContentType.Text.Plain.toString())),
+                    )
+                }
+
+            mockkStatic(::createHttpClient) {
+                every { createHttpClient() } returns httpClientMock(mockEngine)
+
+                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+
+                val exception =
+                    assertThrows<HentOppgaveFeiletException> {
+                        runBlocking { oppgaveClient.hentOppgave(1) }
+                    }
+
+                assertTrue(exception.cause is ClientRequestException)
+            }
+        }
+
+    @Test
     fun `opprettOppgave should return OpprettOppgaveResponse on success`() =
         runBlocking {
             val mockEngine =
                 MockEngine { _ ->
                     respond(
-                        content = """{
-                "id": 1,
-                "status": "CREATED"
-            }""",
+                        content = """{ "id": 1,"status": "CREATED" }""",
                         status = HttpStatusCode.Created,
                         headers = headersOf("Content-Type" to listOf(ContentType.Application.Json.toString())),
                     )
@@ -70,7 +109,7 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl("http://localhost") { "token" }
+                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
                 val request =
                     OpprettOppgaveRequest(
                         oppgavetype = "TYPE",
@@ -81,6 +120,38 @@ class OppgaveClientImplTest {
                 val response = oppgaveClient.opprettOppgave(request)
 
                 assertEquals(1, response.id)
+            }
+        }
+
+    @Test
+    fun `opprettOppgave should throw OpprettOppgaveFeiletException on failure`() =
+        runBlocking {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = "Internal Server Error",
+                        status = HttpStatusCode.InternalServerError,
+                        headers = headersOf("Content-Type" to listOf(ContentType.Text.Plain.toString())),
+                    )
+                }
+
+            mockkStatic(::createHttpClient) {
+                every { createHttpClient() } returns httpClientMock(mockEngine)
+
+                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+                val request =
+                    OpprettOppgaveRequest(
+                        oppgavetype = "TYPE",
+                        aktivDato = LocalDate.now(),
+                        prioritet = Prioritet.HOY,
+                    )
+
+                val exception =
+                    assertThrows<OpprettOppgaveFeiletException> {
+                        runBlocking { oppgaveClient.opprettOppgave(request) }
+                    }
+
+                assertTrue(exception.cause is ServerResponseException)
             }
         }
 
@@ -120,7 +191,7 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl("http://localhost") { "token" }
+                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
                 val request =
                     HentOppgaverRequest(
                         oppgavetype = Oppgavetype.INNTEKTSMELDING,
@@ -152,6 +223,47 @@ class OppgaveClientImplTest {
                 assertEquals("121314", response.oppgaver[0].saksreferanse)
                 assertEquals("516171111", response.oppgaver[0].orgnr)
                 assertEquals(now, response.oppgaver[0].aktivDato)
+            }
+        }
+
+    @Test
+    fun `hentOppgaver should throw HentOppgaveFeiletException on failure`() =
+        runBlocking {
+            val mockEngine =
+                MockEngine { _ ->
+                    respond(
+                        content = "Not Found",
+                        status = HttpStatusCode.NotFound,
+                        headers = headersOf("Content-Type" to listOf(ContentType.Text.Plain.toString())),
+                    )
+                }
+
+            mockkStatic(::createHttpClient) {
+                every { createHttpClient() } returns httpClientMock(mockEngine)
+
+                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+                val request =
+                    HentOppgaverRequest(
+                        oppgavetype = Oppgavetype.INNTEKTSMELDING,
+                        tema = Tema.SYK,
+                        behandlingstype = Behandlingstype.UTLAND,
+                        behandlingstema = Behandlingstema.NORMAL,
+                        statuskategori = Statuskategori.AAPEN,
+                        tildeltEnhetsnr = "1234",
+                        tilordnetRessurs = "5678",
+                        journalpostId = "91011",
+                        saksreferanse = "121314",
+                        orgnr = "516171111",
+                        limit = 10,
+                        offset = 0,
+                    )
+
+                val exception =
+                    assertThrows<HentOppgaveFeiletException> {
+                        runBlocking { oppgaveClient.hentOppgaver(request) }
+                    }
+
+                assertTrue(exception.cause is ClientRequestException)
             }
         }
 
