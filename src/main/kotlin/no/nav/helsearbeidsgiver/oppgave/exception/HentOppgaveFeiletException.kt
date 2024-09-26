@@ -6,7 +6,7 @@ import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 
 class HentOppgaveFeiletException(
     e: Throwable,
-) : RuntimeException("Feilet å hente oppgave: ", e){
+) : RuntimeException("Feilet å hente oppgave: ", e) {
     init {
         when (e) {
             is ClientRequestException -> {
