@@ -20,21 +20,13 @@ import no.nav.helsearbeidsgiver.utils.log.MdcUtils
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 
-interface OppgaveClient {
-    suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse
-
-    suspend fun hentOppgaver(hentOppgaverRequest: HentOppgaverRequest): OppgaveListeResponse
-
-    suspend fun hentOppgave(oppgaveId: Int): Oppgave
-}
-
 class OppgaveClientImpl(
     private val url: String,
     private val getToken: () -> String,
-) : OppgaveClient {
+) {
     private val httpClient = createHttpClient()
 
-    override suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse {
+    suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse {
         val result =
             runCatching {
                 val httpResponse =
@@ -56,7 +48,7 @@ class OppgaveClientImpl(
         )
     }
 
-    override suspend fun hentOppgaver(hentOppgaverRequest: HentOppgaverRequest): OppgaveListeResponse {
+    suspend fun hentOppgaver(hentOppgaverRequest: HentOppgaverRequest): OppgaveListeResponse {
         val result =
             runCatching {
                 val httpResponse =
@@ -89,7 +81,7 @@ class OppgaveClientImpl(
         )
     }
 
-    override suspend fun hentOppgave(oppgaveId: Int): Oppgave {
+    suspend fun hentOppgave(oppgaveId: Int): Oppgave {
         val result =
             runCatching {
                 val httpResponse =
