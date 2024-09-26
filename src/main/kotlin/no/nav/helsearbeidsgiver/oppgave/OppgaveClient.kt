@@ -1,38 +1,101 @@
-package no.nav.syfo.client
+package no.nav.helsearbeidsgiver.oppgave
 
-import java.time.LocalDate
+import io.ktor.client.call.body
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import no.nav.helsearbeidsgiver.oppgave.domain.HentOppgaverRequest
+import no.nav.helsearbeidsgiver.oppgave.domain.Oppgave
+import no.nav.helsearbeidsgiver.oppgave.domain.OppgaveListeResponse
+import no.nav.helsearbeidsgiver.oppgave.domain.OpprettOppgaveRequest
+import no.nav.helsearbeidsgiver.oppgave.domain.OpprettOppgaveResponse
+import no.nav.helsearbeidsgiver.oppgave.exception.HentOppgaveFeiletException
+import no.nav.helsearbeidsgiver.oppgave.exception.OpprettOppgaveFeiletException
+import no.nav.helsearbeidsgiver.utils.log.logger
+import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 
-data class OpprettOppgaveRequest(
-    val tildeltEnhetsnr: String? = null,
-    val aktoerId: String? = null,
-    val journalpostId: String? = null,
-    val behandlesAvApplikasjon: String? = null,
-    val saksreferanse: String? = null,
-    val beskrivelse: String? = null,
-    val tema: String? = null,
-    val oppgavetype: String,
-    val behandlingstype: String? = null,
-    val behandlingstema: String? = null,
-    val aktivDato: LocalDate,
-    val fristFerdigstillelse: LocalDate? = null,
-    val prioritet: String,
-)
+class OppgaveClient(
+    private val url: String,
+    private val getToken: () -> String,
+    private val maxRetries: Int = 0,
+) {
+    private val httpClient = createHttpClient(maxRetries)
 
-data class OpprettOppgaveResponse(
-    val id: Int,
-)
+    suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse {
+        val result =
+            runCatching {
+                val httpResponse =
+                    httpClient.post(url) {
+                        contentTypeJson()
+                        correlationId()
+                        header("Authorization", "Bearer ${getToken()}")
+                        setBody(opprettOppgaveRequest)
+                    }
+                httpResponse.body<OpprettOppgaveResponse>()
+            }
+        return result.fold(
+            onSuccess = { response ->
+                response.also { sikkerLogger().info("Oppgave opprettet: ${it.id}") }
+            },
+            onFailure = { e ->
+                throw OpprettOppgaveFeiletException(e)
+            },
+        )
+    }
 
-data class OppgaveResponse(
-    val antallTreffTotalt: Int,
-    val oppgaver: List<Oppgave>,
-)
+    suspend fun hentOppgaver(hentOppgaverRequest: HentOppgaverRequest): OppgaveListeResponse {
+        val result =
+            runCatching {
+                val httpResponse =
+                    httpClient.get(url) {
+                        contentTypeJson()
+                        correlationId()
+                        header("Authorization", "Bearer ${getToken()}")
+                        parameter("oppgavetype", hentOppgaverRequest.oppgavetype)
+                        parameter("tema", hentOppgaverRequest.tema)
+                        parameter("behandlingstype", hentOppgaverRequest.behandlingstype)
+                        parameter("behandlingstema", hentOppgaverRequest.behandlingstema)
+                        parameter("statuskategori", hentOppgaverRequest.statuskategori)
+                        parameter("tildeltEnhetsnr", hentOppgaverRequest.tildeltEnhetsnr)
+                        parameter("tilordnetRessurs", hentOppgaverRequest.tilordnetRessurs)
+                        parameter("journalpostId", hentOppgaverRequest.journalpostId)
+                        parameter("saksreferanse", hentOppgaverRequest.saksreferanse)
+                        parameter("orgnr", hentOppgaverRequest.orgnr)
+                        parameter("limit", hentOppgaverRequest.limit)
+                        parameter("offset", hentOppgaverRequest.offset)
+                    }
+                httpResponse.body<OppgaveListeResponse>()
+            }
+        return result.fold(
+            onSuccess = { response ->
+                response.also { logger().info("Antall oppgaver hentet: ${it.antallTreffTotalt}") }
+            },
+            onFailure = { e ->
+                throw HentOppgaveFeiletException(e)
+            },
+        )
+    }
 
-data class Oppgave(
-    val id: Int,
-    val tildeltEnhetsnr: String?,
-    val aktoerId: String?,
-    val journalpostId: String?,
-    val saksreferanse: String?,
-    val tema: String?,
-    val oppgavetype: String?,
-)
+    suspend fun hentOppgave(oppgaveId: Int): Oppgave {
+        val result =
+            runCatching {
+                val httpResponse =
+                    httpClient.get("$url/$oppgaveId") {
+                        contentTypeJson()
+                        correlationId()
+                        header("Authorization", "Bearer ${getToken()}")
+                    }
+                httpResponse.body<Oppgave>()
+            }
+        return result.fold(
+            onSuccess = { response ->
+                response.also { sikkerLogger().info("Oppgave hentet: ${it.id}") }
+            },
+            onFailure = { e ->
+                throw HentOppgaveFeiletException(e)
+            },
+        )
+    }
+}
