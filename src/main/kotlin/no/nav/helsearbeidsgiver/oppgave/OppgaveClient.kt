@@ -16,7 +16,7 @@ import no.nav.helsearbeidsgiver.oppgave.exception.OpprettOppgaveFeiletException
 import no.nav.helsearbeidsgiver.utils.log.logger
 import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 
-class OppgaveClientImpl(
+class OppgaveClient(
     private val url: String,
     private val getToken: () -> String,
     private val maxRetries: Int = 0,

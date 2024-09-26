@@ -31,7 +31,7 @@ import kotlin.test.assertTrue
 
 private const val URL = "http://dummyUrl"
 
-class OppgaveClientImplTest {
+class OppgaveClientTest {
     @Test
     fun `hentOppgave should return Oppgave on success`() =
         runBlocking {
@@ -55,7 +55,7 @@ class OppgaveClientImplTest {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
                 val oppgaveClient =
-                    OppgaveClientImpl(
+                    OppgaveClient(
                         URL,
                         getToken = { "token" },
                     )
@@ -86,7 +86,7 @@ class OppgaveClientImplTest {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
                 val oppgaveClient =
-                    OppgaveClientImpl(
+                    OppgaveClient(
                         URL,
                         getToken = { "token" },
                     )
@@ -116,7 +116,7 @@ class OppgaveClientImplTest {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
                 val oppgaveClient =
-                    OppgaveClientImpl(
+                    OppgaveClient(
                         URL,
                         getToken = { "token" },
                     )
@@ -149,7 +149,7 @@ class OppgaveClientImplTest {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
                 val oppgaveClient =
-                    OppgaveClientImpl(
+                    OppgaveClient(
                         URL,
                         getToken = { "token" },
                     )
@@ -206,7 +206,7 @@ class OppgaveClientImplTest {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
                 val oppgaveClient =
-                    OppgaveClientImpl(
+                    OppgaveClient(
                         URL,
                         getToken = { "token" },
                     )
@@ -260,7 +260,7 @@ class OppgaveClientImplTest {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
                 val oppgaveClient =
-                    OppgaveClientImpl(
+                    OppgaveClient(
                         URL,
                         getToken = { "token" },
                     )
@@ -303,7 +303,7 @@ class OppgaveClientImplTest {
                 every { createHttpClient(2) } returns httpClientMock(mockEngine, 2)
 
                 val oppgaveClient =
-                    OppgaveClientImpl(
+                    OppgaveClient(
                         URL,
                         getToken = { "token" },
                         maxRetries = 2,
