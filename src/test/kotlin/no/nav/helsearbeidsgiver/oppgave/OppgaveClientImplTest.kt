@@ -3,17 +3,15 @@ package no.nav.helsearbeidsgiver.oppgave
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
+import io.ktor.client.network.sockets.SocketTimeoutException
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.ServerResponseException
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
-import io.ktor.serialization.kotlinx.json.json
 import io.mockk.every
 import io.mockk.mockkStatic
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.json.Json
 import no.nav.helsearbeidsgiver.oppgave.domain.Behandlingstema
 import no.nav.helsearbeidsgiver.oppgave.domain.Behandlingstype
 import no.nav.helsearbeidsgiver.oppgave.domain.HentOppgaverRequest
@@ -56,7 +54,11 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+                val oppgaveClient =
+                    OppgaveClientImpl(
+                        URL,
+                        getToken = { "token" },
+                    )
 
                 val response = oppgaveClient.hentOppgave(1)
 
@@ -83,7 +85,11 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+                val oppgaveClient =
+                    OppgaveClientImpl(
+                        URL,
+                        getToken = { "token" },
+                    )
 
                 val exception =
                     assertThrows<HentOppgaveFeiletException> {
@@ -109,7 +115,11 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+                val oppgaveClient =
+                    OppgaveClientImpl(
+                        URL,
+                        getToken = { "token" },
+                    )
                 val request =
                     OpprettOppgaveRequest(
                         oppgavetype = "TYPE",
@@ -138,7 +148,11 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+                val oppgaveClient =
+                    OppgaveClientImpl(
+                        URL,
+                        getToken = { "token" },
+                    )
                 val request =
                     OpprettOppgaveRequest(
                         oppgavetype = "TYPE",
@@ -191,7 +205,11 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+                val oppgaveClient =
+                    OppgaveClientImpl(
+                        URL,
+                        getToken = { "token" },
+                    )
                 val request =
                     HentOppgaverRequest(
                         oppgavetype = Oppgavetype.INNTEKTSMELDING,
@@ -241,7 +259,11 @@ class OppgaveClientImplTest {
             mockkStatic(::createHttpClient) {
                 every { createHttpClient() } returns httpClientMock(mockEngine)
 
-                val oppgaveClient = OppgaveClientImpl(URL) { "token" }
+                val oppgaveClient =
+                    OppgaveClientImpl(
+                        URL,
+                        getToken = { "token" },
+                    )
                 val request =
                     HentOppgaverRequest(
                         oppgavetype = Oppgavetype.INNTEKTSMELDING,
@@ -267,11 +289,39 @@ class OppgaveClientImplTest {
             }
         }
 
-    private fun httpClientMock(mockEngine: MockEngine) =
-        HttpClient(mockEngine) {
-            expectSuccess = true
-            install(ContentNegotiation) {
-                json(Json { ignoreUnknownKeys = true })
+    @Test
+    fun `hentOppgave should retry on SocketTimeoutException`() =
+        runBlocking {
+            var callCount = 0
+            val mockEngine =
+                MockEngine { _ ->
+                    callCount++
+                    throw SocketTimeoutException("Connection timeout")
+                }
+
+            mockkStatic(::createHttpClient) {
+                every { createHttpClient(2) } returns httpClientMock(mockEngine, 2)
+
+                val oppgaveClient =
+                    OppgaveClientImpl(
+                        URL,
+                        getToken = { "token" },
+                        maxRetries = 2,
+                    )
+
+                val exception =
+                    assertThrows<HentOppgaveFeiletException> {
+                        runBlocking { oppgaveClient.hentOppgave(1) }
+                    }
+                assertTrue(exception.cause is SocketTimeoutException)
+                assertEquals(3, callCount)
             }
         }
+
+    private fun httpClientMock(
+        mockEngine: MockEngine,
+        maxRetry: Int = 0,
+    ) = HttpClient(mockEngine) {
+        configure(maxRetry)
+    }
 }
