@@ -18,12 +18,17 @@ plugins {
 }
 
 group = "no.nav.helsearbeidsgiver"
-version = "0.1.3"
+version = "0.1.4"
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_21)
+        jvmTarget.set(JvmTarget.JVM_17)
     }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks {
@@ -32,7 +37,6 @@ tasks {
         jvmArgs("-XX:+EnableDynamicAgentLoading")
     }
 }
-
 repositories {
     mavenCentral()
     mavenNav("*")
