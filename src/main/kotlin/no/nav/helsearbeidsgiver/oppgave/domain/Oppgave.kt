@@ -63,6 +63,8 @@ data class HentOppgaverRequest(
     val orgnr: String? = null,
     val limit: Int? = 10,
     val offset: Int? = 0,
+    val sorteringsrekkefolge: String? = null,
+    val sorteringsfelt: String? = null,
 )
 
 @Serializable
