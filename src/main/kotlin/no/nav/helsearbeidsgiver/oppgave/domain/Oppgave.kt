@@ -51,18 +51,18 @@ data class OpprettOppgaveRequest(
 
 @Serializable
 data class HentOppgaverRequest(
-    val oppgavetype: String?,
-    val tema: String?,
-    val behandlingstype: String?,
-    val behandlingstema: String?,
-    val statuskategori: Statuskategori?,
-    val tildeltEnhetsnr: String?,
-    val tilordnetRessurs: String?,
-    val journalpostId: String?,
-    val saksreferanse: String?,
-    val orgnr: String?,
-    val limit: Int?,
-    val offset: Int?,
+    val oppgavetype: String? = null,
+    val tema: String? = null,
+    val behandlingstype: String? = null,
+    val behandlingstema: String? = null,
+    val statuskategori: Statuskategori? = null,
+    val tildeltEnhetsnr: String? = null,
+    val tilordnetRessurs: String? = null,
+    val journalpostId: String? = null,
+    val saksreferanse: String? = null,
+    val orgnr: String? = null,
+    val limit: Int? = 10,
+    val offset: Int? = 0,
 )
 
 @Serializable
