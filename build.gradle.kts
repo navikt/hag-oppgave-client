@@ -63,7 +63,7 @@ dependencies {
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
 
-    testRuntimeOnly("org.slf4j:slf4j-simple:${slf4jVersion}")
+    testRuntimeOnly("org.slf4j:slf4j-simple:$slf4jVersion")
 }
 
 fun RepositoryHandler.mavenNav(repo: String): MavenArtifactRepository {
