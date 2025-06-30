@@ -1,15 +1,5 @@
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
-val ktorVersion: String by project
-val kotlinVersion: String by project
-val logbackVersion: String by project
-val mockkVersion: String by project
-val tokenProviderVersion: String by project
-val githubPassword: String by project
-val kotlinSerializationVersion: String by project
-val utilsVersion: String by project
-val slf4jVersion: String by project
-
 plugins {
     kotlin("jvm")
     kotlin("plugin.serialization")
@@ -22,13 +12,8 @@ version = "0.1.6"
 
 kotlin {
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
+        jvmTarget.set(JvmTarget.JVM_21)
     }
-}
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
 }
 
 tasks {
@@ -37,6 +22,11 @@ tasks {
         jvmArgs("-XX:+EnableDynamicAgentLoading")
     }
 }
+
+java {
+    withSourcesJar()
+}
+
 repositories {
     mavenCentral()
     mavenNav("*")
@@ -53,6 +43,29 @@ publishing {
     }
 }
 
+dependencies {
+    val kotlinxSerializationVersion: String by project
+    val ktorVersion: String by project
+    val mockkVersion: String by project
+    val slf4jVersion: String by project
+    val utilsVersion: String by project
+
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
+    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
+    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
+    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
+    implementation("no.nav.helsearbeidsgiver:utils:$utilsVersion")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
+
+    testImplementation(kotlin("test"))
+    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
+    testImplementation("io.mockk:mockk:$mockkVersion")
+
+    testRuntimeOnly("org.slf4j:slf4j-simple:${slf4jVersion}")
+}
+
 fun RepositoryHandler.mavenNav(repo: String): MavenArtifactRepository {
     val githubPassword: String by project
 
@@ -63,19 +76,4 @@ fun RepositoryHandler.mavenNav(repo: String): MavenArtifactRepository {
             password = githubPassword
         }
     }
-}
-dependencies {
-    implementation("io.ktor:ktor-client-core:$ktorVersion")
-    implementation("io.ktor:ktor-client-json:$ktorVersion")
-    implementation("io.ktor:ktor-client-serialization:$ktorVersion")
-    implementation("io.ktor:ktor-serialization-kotlinx-json:$ktorVersion")
-    implementation("io.ktor:ktor-client-apache5:$ktorVersion")
-    implementation("io.ktor:ktor-client-content-negotiation:$ktorVersion")
-    implementation("no.nav.helsearbeidsgiver:utils:$utilsVersion")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinSerializationVersion")
-
-    testRuntimeOnly("org.slf4j:slf4j-simple:$slf4jVersion")
-    testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
-    testImplementation("io.mockk:mockk:$mockkVersion")
-    testImplementation(kotlin("test"))
 }
