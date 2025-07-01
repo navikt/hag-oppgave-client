@@ -1,11 +1,10 @@
-@file:UseSerializers(LocalDateSerializer::class, LocalDateTimeSerializer::class)
+@file:UseSerializers(LocalDateSerializer::class)
 
 package no.nav.helsearbeidsgiver.oppgave.domain
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import no.nav.helsearbeidsgiver.utils.json.serializer.LocalDateSerializer
-import no.nav.helsearbeidsgiver.utils.json.serializer.LocalDateTimeSerializer
 import java.time.LocalDate
 
 @Serializable

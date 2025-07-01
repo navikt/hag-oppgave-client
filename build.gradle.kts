@@ -44,6 +44,7 @@ publishing {
 }
 
 dependencies {
+    val kotlinxCoroutinesVersion: String by project
     val kotlinxSerializationVersion: String by project
     val ktorVersion: String by project
     val mockkVersion: String by project
@@ -59,9 +60,11 @@ dependencies {
     implementation("no.nav.helsearbeidsgiver:utils:$utilsVersion")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:$kotlinxSerializationVersion")
 
+    testImplementation(testFixtures("no.nav.helsearbeidsgiver:utils:$utilsVersion"))
     testImplementation(kotlin("test"))
     testImplementation("io.ktor:ktor-client-mock:$ktorVersion")
     testImplementation("io.mockk:mockk:$mockkVersion")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:$kotlinxCoroutinesVersion")
 
     testRuntimeOnly("org.slf4j:slf4j-simple:$slf4jVersion")
 }
