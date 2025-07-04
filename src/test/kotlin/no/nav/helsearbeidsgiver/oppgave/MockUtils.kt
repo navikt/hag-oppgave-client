@@ -27,7 +27,7 @@ fun mockOppgaveClient(vararg responses: Pair<HttpStatusCode, String>): OppgaveCl
             )
         }
 
-    val mockHttpClient = HttpClient(mockEngine) { configure(0) }
+    val mockHttpClient = HttpClient(mockEngine) { configure(retries = 0) }
 
     return mockStatic(::createHttpClient) {
         every { createHttpClient() } returns mockHttpClient
