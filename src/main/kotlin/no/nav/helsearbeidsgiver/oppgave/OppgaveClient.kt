@@ -19,12 +19,11 @@ import no.nav.helsearbeidsgiver.utils.log.sikkerLogger
 class OppgaveClient(
     private val url: String,
     private val getToken: () -> String,
-    maxRetries: Int = 0,
 ) {
     private val logger = logger()
     private val sikkerLogger = sikkerLogger()
 
-    private val httpClient = createHttpClient(maxRetries)
+    private val httpClient = createHttpClient()
 
     suspend fun opprettOppgave(opprettOppgaveRequest: OpprettOppgaveRequest): OpprettOppgaveResponse =
         runCatching {
