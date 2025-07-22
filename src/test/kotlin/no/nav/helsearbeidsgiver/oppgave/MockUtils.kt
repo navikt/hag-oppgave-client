@@ -8,6 +8,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.headersOf
 import io.mockk.every
+import kotlinx.coroutines.delay
 import no.nav.helsearbeidsgiver.utils.test.mock.mockStatic
 
 fun mockOppgaveClient(vararg responses: Pair<HttpStatusCode, String>): OppgaveClient {
@@ -17,6 +18,9 @@ fun mockOppgaveClient(vararg responses: Pair<HttpStatusCode, String>): OppgaveCl
             requestHandlers.addAll(
                 responses.map { (status, content) ->
                     {
+                        if (content == "timeout") {
+                            delay(1100)
+                        }
                         respond(
                             content = content,
                             status = status,
@@ -27,13 +31,10 @@ fun mockOppgaveClient(vararg responses: Pair<HttpStatusCode, String>): OppgaveCl
             )
         }
 
-    val mockHttpClient = HttpClient(mockEngine) { configure(retries = 0) }
+    val mockHttpClient = HttpClient(mockEngine) { configure() }
 
     return mockStatic(::createHttpClient) {
         every { createHttpClient() } returns mockHttpClient
-        OppgaveClient(
-            "mock-url",
-            { "fake token" },
-        )
+        OppgaveClient("mock-url") { "mock token" }
     }
 }
