@@ -19,7 +19,7 @@ fun mockOppgaveClient(vararg responses: Pair<HttpStatusCode, String>): OppgaveCl
                 responses.map { (status, content) ->
                     {
                         if (content == "timeout") {
-                            delay(200_000)
+                            delay(1100)
                         }
                         respond(
                             content = content,
