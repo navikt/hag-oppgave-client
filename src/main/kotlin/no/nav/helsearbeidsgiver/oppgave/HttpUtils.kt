@@ -26,16 +26,16 @@ internal fun HttpClientConfig<*>.configure() {
 
     install(HttpRequestRetry) {
         retryOnException(
-            maxRetries = 5,
+            maxRetries = 3,
             retryOnTimeout = true,
         )
         exponentialDelay()
     }
 
     install(HttpTimeout) {
-        connectTimeoutMillis = 1000
-        requestTimeoutMillis = 1000
-        socketTimeoutMillis = 1000
+        connectTimeoutMillis = 10000
+        requestTimeoutMillis = 10000
+        socketTimeoutMillis = 10000
     }
 }
 

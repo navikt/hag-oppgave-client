@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "no.nav.helsearbeidsgiver"
-version = "0.2.0"
+version = "0.2.1"
 
 kotlin {
     compilerOptions {
