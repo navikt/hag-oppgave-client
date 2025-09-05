@@ -107,11 +107,9 @@ class OppgaveClientTest :
                     }
                 }
 
-                test("lykkes ved færre 5xx-feil enn max retries (5)") {
+                test("lykkes ved færre 5xx-feil enn max retries (3)") {
                     val mockOppgaveClient =
                         mockOppgaveClient(
-                            HttpStatusCode.InternalServerError to "",
-                            HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
@@ -125,11 +123,9 @@ class OppgaveClientTest :
                     }
                 }
 
-                test("feiler ved flere 5xx-feil enn max retries (5)") {
+                test("feiler ved flere 5xx-feil enn max retries (3)") {
                     val mockOppgaveClient =
                         mockOppgaveClient(
-                            HttpStatusCode.InternalServerError to "",
-                            HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
                             HttpStatusCode.InternalServerError to "",
@@ -154,8 +150,6 @@ class OppgaveClientTest :
                 test("kall feiler og prøver på nytt ved timeout") {
                     val mockOppgaveClient =
                         mockOppgaveClient(
-                            HttpStatusCode.OK to "timeout",
-                            HttpStatusCode.OK to "timeout",
                             HttpStatusCode.OK to "timeout",
                             HttpStatusCode.OK to "timeout",
                             HttpStatusCode.OK to "timeout",
