@@ -1,11 +1,13 @@
-@file:UseSerializers(LocalDateSerializer::class)
+@file:UseSerializers(LocalDateSerializer::class, UuidSerializer::class)
 
 package no.nav.helsearbeidsgiver.oppgave.domain
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.UseSerializers
 import no.nav.helsearbeidsgiver.utils.json.serializer.LocalDateSerializer
+import no.nav.helsearbeidsgiver.utils.json.serializer.UuidSerializer
 import java.time.LocalDate
+import java.util.UUID
 
 @Serializable
 data class Oppgave(
@@ -46,6 +48,7 @@ data class OpprettOppgaveRequest(
     val aktivDato: LocalDate,
     val fristFerdigstillelse: LocalDate? = null,
     val prioritet: Prioritet,
+    val uuid: UUID? = null,
 )
 
 @Serializable
